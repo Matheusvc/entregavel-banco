@@ -1,0 +1,7 @@
+.idea/
+.git_old/
+*.iml
+node_modules/
+.DS_Store
+Thumbs.db
+*.dump

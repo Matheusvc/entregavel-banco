@@ -1,0 +1,17 @@
+# Backups gerados pelo 08_backup.sh (não versionar dumps)
+backups/
+*.dump
+*.backup
+*.sql.gz
+
+# IDEs / editores
+.idea/
+.vscode/
+*.iml
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
