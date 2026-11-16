@@ -1,24 +1,18 @@
-# Oxygeni Hub — Entregáveis de Banco de Dados
+# Oxygeni Hub — Banco de Dados
 
-Repositório com todos os entregáveis da disciplina de **Banco de Dados** do projeto **Oxygeni Hub**.
-
----
+Entregáveis da disciplina de **Banco de Dados** do projeto **Oxygeni Hub**.
 
 ## Estrutura
 
-| Pasta / Arquivo | Semana | Conteúdo |
-|---|---|---|
-| [`database.sql`](database.sql), [`inserts.sql`](inserts.sql) | Semana 01 | Modelagem inicial — Sistema de Cursos (DDL + inserts). |
-| [`modelagem-banco-de-dados-02`](modelagem-banco-de-dados-02/) | Semana 02 | Modelagem relacional — script SQL e modelo lógico. |
-| [`entregavel-banco-02`](entregavel-banco-02/) | Semana 02 | Modelo lógico (imagem). |
-| [`modelagem-banco-de-dados-04`](modelagem-banco-de-dados-04/) | Semana 04 | DDL, dados de teste, transações, `EXPLAIN` e segurança (PostgreSQL). |
-| [`modelagem-banco-de-dados-06`](modelagem-banco-de-dados-06/) | Semana 06 | Projeto relacional completo + backup/restauração + introdução ao MongoDB. |
-| [`modelagem-banco-de-dados-07-08`](modelagem-banco-de-dados-07-08/) | Semanas 07-08 | Modelagem NoSQL com MongoDB — catálogo de e-commerce (arrays, subdocumentos, índices, `$elemMatch`, `explain`). |
-
----
+| Pasta | Conteúdo |
+|---|---|
+| [`semana-02`](semana-02/) | Modelagem relacional — DDL inicial (PostgreSQL). |
+| [`semana-03`](semana-03/) | Do conceito à tabela — modelo lógico, normalização 3FN, inserts e joins. |
+| [`semana-04`](semana-04/) | DDL, dados de teste, transações, `EXPLAIN` e segurança (PostgreSQL). |
+| [`semana-06`](semana-06/) | Projeto relacional completo + backup + introdução ao MongoDB. |
+| [`semana-07-08`](semana-07-08/) | Modelagem NoSQL — catálogo de e-commerce com MongoDB. |
 
 ## Tecnologias
 
-- **PostgreSQL** — banco relacional (semanas 01–06)
-- **MongoDB** — banco NoSQL orientado a documentos (semanas 06–08)
-- **mongosh** — shell interativo do MongoDB
+- **PostgreSQL** — banco relacional
+- **MongoDB** — banco NoSQL orientado a documentos
