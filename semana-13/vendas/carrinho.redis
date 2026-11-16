@@ -1,0 +1,108 @@
+# ==============================================================================
+# OXYGENI HUB  |  Semana 13 — Persistência Poliglota
+# Contexto: VENDAS (Redis)
+# Arquivo: carrinho.redis
+#
+# Objetivo: armazenar e recuperar sessões de carrinho de compras com alta
+#           performance usando Redis como cache em memória.
+# Foco: baixa latência, TTL para carrinhos abandonados, leitura/escrita rápida.
+#
+# Como executar:
+#   cat carrinho.redis | redis-cli
+#   (ou colar comando por comando no redis-cli)
+# ==============================================================================
+
+# ==============================================================================
+# Key Design
+#
+# Padrão:  cart:session:{session_id}
+# Tipo:    Hash
+# Campos:  product:{id} → quantidade
+# TTL:     1800s (30 min) — sessão do carrinho expira se inativa
+#
+# Chaves auxiliares:
+#   session:user:{user_id} → session_id (mapeia usuário → sessão ativa)
+# ==============================================================================
+
+# Limpa dados anteriores (idempotência)
+DEL cart:session:sess_a1b2c3
+DEL cart:session:sess_d4e5f6
+DEL session:user:1001
+DEL session:user:1002
+
+# --- Mapear sessões a usuários ---
+SET session:user:1001 sess_a1b2c3
+SET session:user:1002 sess_d4e5f6
+
+# ==============================================================================
+# Operações do Carrinho — Sessão 1 (Ana Silva)
+# ==============================================================================
+
+# Adicionar itens ao carrinho
+HSET cart:session:sess_a1b2c3 product:101 2
+HSET cart:session:sess_a1b2c3 product:102 1
+HSET cart:session:sess_a1b2c3 product:105 1
+
+# Ler o carrinho completo
+HGETALL cart:session:sess_a1b2c3
+# Esperado:
+# product:101 → 2  (Smartphone, qty 2)
+# product:102 → 1  (Camiseta, qty 1)
+# product:105 → 1  (Café, qty 1)
+
+# Atualizar quantidade
+HINCRBY cart:session:sess_a1b2c3 product:101 -1
+# Resultado: 1 (diminuiu de 2 para 1)
+
+# Remover um item
+HDEL cart:session:sess_a1b2c3 product:105
+
+# Total de itens distintos no carrinho
+HLEN cart:session:sess_a1b2c3
+# Resultado: 2
+
+# Definir TTL — carrinho expira em 30 minutos (1800 segundos)
+EXPIRE cart:session:sess_a1b2c3 1800
+
+# Verificar tempo restante
+TTL cart:session:sess_a1b2c3
+
+# ==============================================================================
+# Operações do Carrinho — Sessão 2 (Bruno Costa)
+# ==============================================================================
+
+HSET cart:session:sess_d4e5f6 product:103 1
+HSET cart:session:sess_d4e5f6 product:104 2
+
+HGETALL cart:session:sess_d4e5f6
+
+EXPIRE cart:session:sess_d4e5f6 1800
+
+# ==============================================================================
+# Simulação de Checkout — Finalização da compra
+# ==============================================================================
+#
+# Fluxo:
+#   1. Ler o carrinho (dados para criar o pedido)
+#   2. Enviar evento para o contexto Financeiro (gerar fatura)
+#   3. Enviar evento para o contexto Estoque (dar baixa)
+#   4. Deletar o carrinho do cache (invalidação)
+#   5. Remover mapeamento da sessão
+
+# 1. Ler carrinho antes de invalidar
+HGETALL cart:session:sess_d4e5f6
+
+# 4. Invalidar cache do carrinho
+DEL cart:session:sess_d4e5f6
+
+# 5. Remover mapeamento de sessão
+DEL session:user:1002
+
+# Confirmar que foi removido
+EXISTS cart:session:sess_d4e5f6
+# Resultado: 0
+
+# Carrinho da sessão 1 ainda ativo
+EXISTS cart:session:sess_a1b2c3
+# Resultado: 1
+TTL cart:session:sess_a1b2c3

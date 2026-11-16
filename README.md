@@ -12,6 +12,7 @@ Entregáveis da disciplina de **Banco de Dados** do projeto **Oxygeni Hub**.
 | [`semana-06`](semana-06/) | Projeto relacional completo + backup + introdução ao MongoDB. |
 | [`semana-07-08`](semana-07-08/) | Modelagem NoSQL — catálogo de e-commerce com MongoDB. |
 | [`semana-09-12`](semana-09-12/) | Grafo de recomendações (Neo4j) + cache de carrinho (Redis). |
+| [`semana-13`](semana-13/) | Persistência Poliglota — 3 contextos: Financeiro (PostgreSQL), Estoque (MongoDB), Vendas (Redis). |
 
 ## Tecnologias
 
