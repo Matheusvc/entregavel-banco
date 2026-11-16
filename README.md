@@ -14,6 +14,7 @@ Entregáveis da disciplina de **Banco de Dados** do projeto **Oxygeni Hub**.
 | [`semana-09-12`](semana-09-12/) | Grafo de recomendações (Neo4j) + cache de carrinho (Redis). |
 | [`semana-13`](semana-13/) | Persistência Poliglota — 3 contextos: Financeiro (PostgreSQL), Estoque (MongoDB), Vendas (Redis). |
 | [`semana-14`](semana-14/) | Projeto Final — escopo, requisitos, entidades e decisão tecnológica (Híbrido: PostgreSQL + MongoDB). |
+| [`semana-15`](semana-15/) | MER, normalização até 3FN, chaves (PK/FK) e demonstração de integridade referencial (PostgreSQL). |
 
 ## Tecnologias
 
