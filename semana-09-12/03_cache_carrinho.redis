@@ -1,0 +1,139 @@
+# ==============================================================================
+# OXYGENI HUB  |  Semanas 09-12 — Grafos e Cache
+# Arquivo: 03_cache_carrinho.redis
+# Parte 1 — Estrutura de Cache  |  Parte 2 — Operações  |  Parte 3 — Desafio
+#
+# Objetivo: modelar um sistema de cache para carrinho de compras usando Redis
+#           com Hashes, TTL e estratégia de invalidação.
+#
+# Como executar:
+#   cat 03_cache_carrinho.redis | redis-cli
+#   (ou colar comando por comando no redis-cli)
+# ==============================================================================
+
+# ==============================================================================
+# PARTE 1 — Estrutura de Cache (Key Design)
+# ==============================================================================
+#
+# Padrão de nomenclatura das chaves:
+#   cart:user:{user_id}
+#
+# Estrutura de dados: Hash (HSET)
+#   - Cada campo do Hash representa um produto (product:{id})
+#   - O valor é a quantidade
+#
+# Vantagens do Hash sobre String/JSON:
+#   - Atualizar a quantidade de UM item sem reescrever o carrinho inteiro
+#   - Remover um item específico com HDEL (sem deserializar JSON)
+#   - Listar todos os itens com HGETALL
+#
+# Exemplo visual:
+#   KEY: cart:user:1001
+#   HASH:
+#     product:101 -> 2    (Notebook Gamer ProX, qty: 2)
+#     product:102 -> 1    (Fone Bluetooth ANC, qty: 1)
+#     product:103 -> 3    (Camiseta Dry-Fit, qty: 3)
+# ==============================================================================
+
+# Limpa carrinhos anteriores (idempotência)
+DEL cart:user:1001
+DEL cart:user:1002
+
+# ==============================================================================
+# PARTE 2 — Operações do Carrinho
+# ==============================================================================
+
+# --- 2.1  Adicionar itens ao carrinho do usuário 1001 (Ana Silva) ---
+# HSET cart:user:{id} product:{product_id} {quantidade}
+
+HSET cart:user:1001 product:101 2
+HSET cart:user:1001 product:102 1
+HSET cart:user:1001 product:103 3
+
+# --- 2.2  Adicionar itens ao carrinho do usuário 1002 (Bruno Costa) ---
+
+HSET cart:user:1002 product:104 1
+HSET cart:user:1002 product:101 1
+
+# --- 2.3  Ler o carrinho completo ---
+# HGETALL retorna todos os campos e valores do Hash
+
+HGETALL cart:user:1001
+# Resultado esperado:
+# 1) "product:101"
+# 2) "2"
+# 3) "product:102"
+# 4) "1"
+# 5) "product:103"
+# 6) "3"
+
+HGETALL cart:user:1002
+
+# --- 2.4  Consultar quantidade de um item específico ---
+
+HGET cart:user:1001 product:101
+# Resultado: "2"
+
+# --- 2.5  Atualizar quantidade de um item ---
+# Incrementar a quantidade do product:102 em 1
+
+HINCRBY cart:user:1001 product:102 1
+# Resultado: 2 (era 1, agora é 2)
+
+# --- 2.6  Remover um item do carrinho ---
+
+HDEL cart:user:1001 product:103
+# Resultado: 1 (campo removido)
+
+# Verificar o carrinho após a remoção
+HGETALL cart:user:1001
+
+# --- 2.7  Contar quantos itens distintos há no carrinho ---
+
+HLEN cart:user:1001
+# Resultado: 2 (product:101 e product:102)
+
+# --- 2.8  Definir TTL (Time To Live) para abandono de carrinho ---
+# Se o usuário não finalizar a compra em 24h (86400 segundos), o carrinho expira.
+
+EXPIRE cart:user:1001 86400
+EXPIRE cart:user:1002 86400
+
+# Verificar o tempo restante
+TTL cart:user:1001
+# Resultado: ~86400 (segundos restantes)
+
+# ==============================================================================
+# PARTE 3 — Desafio: Estratégia de Invalidação de Cache
+# ==============================================================================
+#
+# Cenário: o usuário 1002 (Bruno Costa) finalizou a compra (checkout).
+#
+# Estratégia de invalidação:
+#   1. ANTES de deletar, ler o carrinho para registrar o pedido no banco principal
+#   2. Deletar a chave do cache (DEL) para liberar memória
+#   3. O TTL não é mais necessário porque a chave foi removida explicitamente
+#
+# Em uma aplicação real, o fluxo seria:
+#   app.checkout(user_id) {
+#     carrinho = HGETALL cart:user:{id}     // 1. Ler o carrinho
+#     salvar_pedido_no_banco(carrinho)       // 2. Persistir no banco principal
+#     DEL cart:user:{id}                     // 3. Invalidar o cache
+#   }
+# ==============================================================================
+
+# Passo 1: Ler o carrinho antes de deletar (simular registro do pedido)
+HGETALL cart:user:1002
+
+# Passo 2: Deletar a chave do carrinho após o checkout
+DEL cart:user:1002
+# Resultado: 1 (chave removida)
+
+# Passo 3: Confirmar que o carrinho foi removido
+EXISTS cart:user:1002
+# Resultado: 0 (não existe mais)
+
+# Verificar que o carrinho do usuário 1001 ainda existe (não fez checkout)
+EXISTS cart:user:1001
+# Resultado: 1 (ainda existe, aguardando TTL ou checkout)
+TTL cart:user:1001

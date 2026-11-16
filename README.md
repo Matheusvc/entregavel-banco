@@ -11,8 +11,11 @@ Entregáveis da disciplina de **Banco de Dados** do projeto **Oxygeni Hub**.
 | [`semana-04`](semana-04/) | DDL, dados de teste, transações, `EXPLAIN` e segurança (PostgreSQL). |
 | [`semana-06`](semana-06/) | Projeto relacional completo + backup + introdução ao MongoDB. |
 | [`semana-07-08`](semana-07-08/) | Modelagem NoSQL — catálogo de e-commerce com MongoDB. |
+| [`semana-09-12`](semana-09-12/) | Grafo de recomendações (Neo4j) + cache de carrinho (Redis). |
 
 ## Tecnologias
 
 - **PostgreSQL** — banco relacional
 - **MongoDB** — banco NoSQL orientado a documentos
+- **Neo4j** — banco de dados de grafos
+- **Redis** — banco de dados chave-valor em memória
